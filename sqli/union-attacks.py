@@ -6,12 +6,12 @@
 import requests
 requests.packages.urllib3.disable_warnings()
 
-base = "https://ac991f851eb890e0802753a1005d0035.web-security-academy.net"
+base = "https://ac031fd11e7cb684806d0680004200ce.web-security-academy.net"
 path = "/filter"
 url = base + path
 proxy = "127.0.0.1:8080"
-proxies = {"https": proxy, "http": proxy}
-cookies = {"session": "Need a valid session token here"}
+proxies = {"https://": proxy, "http://": proxy}
+cookies = {"session": "vZqbE7J91aHMd4AC65hs2w5nrIl48BUR"}
 verify = False
 
 def determineNumberOfColumnsLab():
