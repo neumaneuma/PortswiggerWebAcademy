@@ -11,7 +11,7 @@ path = "/filter"
 url = base + path
 
 proxy = "127.0.0.1:8080"
-proxies = {"https": proxy, "http": proxy}
+proxies = {"https://": proxy, "http://": proxy}
 verify = False
 cookies = {"session": "Need a valid session token here"}
 

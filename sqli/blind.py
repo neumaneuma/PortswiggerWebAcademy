@@ -8,7 +8,7 @@ base = "https://ac8f1f0d1f5160fd8057c87200b800cd.web-security-academy.net"
 url = base
 
 proxy = "127.0.0.1:8080"
-proxies = {"https": proxy, "http": proxy}
+proxies = {"https://": proxy, "http://": proxy}
 verify = False
 cookies = {"session": "VVXQRGw3N3jH2NKYMtdsnMzs6VE99ucI"}
 key = "TrackingId"
